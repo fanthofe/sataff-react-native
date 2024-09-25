@@ -1,37 +1,49 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
-
-import { useColorScheme } from '@/hooks/useColorScheme';
-
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
+import { TabBarIcon } from "@/components/navigation/TabBarIcon";
+import { Colors } from "@/constants/Colors";
+import { Tabs } from "expo-router";
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
-
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
-  if (!loaded) {
-    return null;
-  }
-
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-    </ThemeProvider>
+    <Tabs 
+      screenOptions={{ 
+        tabBarActiveTintColor: Colors.light.tint,
+        headerShown: false 
+        }}>
+      <Tabs.Screen 
+        name="index"
+        options={{
+          title: "Rechercher",
+          tabBarIcon: ({color}) => 
+            <TabBarIcon name={'search-outline'} color={color} /> 
+        }} />
+      <Tabs.Screen 
+        name="favorites"
+        options={{
+          title: "Favoris",
+          tabBarIcon: ({color}) => 
+            <TabBarIcon name={'heart-outline'} color={color} /> 
+        }} />
+      <Tabs.Screen 
+        name="publications"
+        options={{
+          title: "Publier",
+          tabBarIcon: ({color}) => 
+            <TabBarIcon name={'add-circle-outline'} color={color} /> 
+        }} />
+      <Tabs.Screen 
+        name="messages"
+        options={{
+          title: "Messages",
+          tabBarIcon: ({color}) => 
+            <TabBarIcon name={'chatbox-outline'} color={color} /> 
+        }} />
+      <Tabs.Screen 
+        name="profil"
+        options={{
+          title: "Profil",
+          tabBarIcon: ({color}) => 
+            <TabBarIcon name={'person-circle-outline'} color={color} /> 
+        }} />
+    </Tabs>
   );
 }
