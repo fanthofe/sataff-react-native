@@ -1,15 +1,17 @@
-import { Card } from "@/components/Card";
 import { PatenteCard } from "@/components/patentes/PatenteCard";
+import { SearchBar } from "@/components/SearchBar";
 import { ThemedText } from "@/components/ThemedText";
 import { Colors } from "@/constants/Colors";
-import { StyleSheet, View, Image, FlatList } from "react-native";
+import { getPatenteId } from "@/functions/patente";
+import { useFetchQuery, useInfiniteFetchQuery } from "@/hooks/useFetchQuery";
+import { useState } from "react";
+import { StyleSheet, View, Image, FlatList, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
-  const patentes = Array.from({length: 20}, (_, k) => ({
-    name: 'Name',
-    id: k + 1
-  }))
+  const {data, isFetching, fetchNextPage} = useInfiniteFetchQuery('/pokemon?limit=20');
+  const patentes = data?.pages.flatMap(page => page.results) ?? [];
+  const [search, setSearch] = useState("");
 
   return (
     <SafeAreaView style={[styles.container, {backgroundColor: Colors.light.bgWhite}]}>
@@ -19,6 +21,9 @@ export default function Index() {
           style={styles.logo}
         />
       </View>
+      <View>
+        <SearchBar value={search} onChange={setSearch} />
+      </View>
       <View style={styles.body}>
         <ThemedText variant="headline" style={styles.titleCard}>
           Populaires
@@ -26,14 +31,16 @@ export default function Index() {
         <FlatList
           data={patentes}
           contentContainerStyle={styles.flatList}
-          renderItem={({item}) => <PatenteCard id={item.id} name={item.name} style={styles.patenteCard}>
-           <ThemedText variant="subtitle1">
-            {item.name}
-           </ThemedText>
-          </PatenteCard>} 
-          keyExtractor={(item) => item.id.toString()}
+          renderItem={({item}) => <PatenteCard id={getPatenteId(item.url)} name={item.name} 
+          style={styles.patenteCard}/>} 
+          keyExtractor={(item) => item.url}
+          // Ajoute un loader à chaque nouveau chargement de la page
+          ListFooterComponent={
+            isFetching ? <View style={styles.loader}><ActivityIndicator size='large' color={Colors.light.tint} /></View> : null
+          }
+          // Détecte la fin d'une liste
+          onEndReached={() => fetchNextPage()}
           horizontal
-          pagingEnabled
         />
       </View>
     </SafeAreaView>
@@ -64,5 +71,9 @@ const styles = StyleSheet.create({
   },
   patenteCard: {
     backgroundColor: Colors.light.grayDark
+  }, 
+  loader: {
+    alignItems: 'center',
+    justifyContent: 'center'
   }
 });
